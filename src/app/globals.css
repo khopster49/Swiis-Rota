@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-swiis-orange: #f47932;
+  --color-swiis-orange-light: #fef3ec;
+  --color-swiis-blue: #0091cd;
+  --color-swiis-blue-light: #e6f5fb;
+  --color-swiis-green: #8dc63f;
+  --color-swiis-green-light: #f0f9e6;
+  --color-swiis-purple: #542e81;
+  --color-swiis-purple-light: #f0ebf5;
+  --color-swiis-red: #b91c1c;
+  --color-swiis-red-light: #fef2f2;
+  --color-swiis-dark-blue: #005a8b;
+  --color-background-light: #f8f9fa;
+  --color-background-dark: #111827;
+
+  --font-sans: "Inter", sans-serif;
+  --font-heading: "Montserrat", sans-serif;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+body {
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
+}

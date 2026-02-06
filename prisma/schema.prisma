@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  role            String   @default("SUPPORT_WORKER")
+  phone           String?
+  avatarUrl       String?
+  isActive        Boolean  @default(true)
+  escalationOrder Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  primaryShifts     ShiftAssignment[] @relation("PrimaryStaff")
+  secondaryShifts   ShiftAssignment[] @relation("SecondaryStaff")
+  swapRequestsFrom  SwapRequest[]     @relation("SwapRequester")
+  swapRequestsTo    SwapRequest[]     @relation("SwapTarget")
+  handoversGiven    Handover[]        @relation("HandoverFrom")
+  handoversReceived Handover[]        @relation("HandoverTo")
+  activityLogs      ActivityLog[]
+  notifications     Notification[]
+}
+
+model Shift {
+  id        String   @id @default(cuid())
+  date      DateTime
+  type      String
+  startTime DateTime
+  endTime   DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignment   ShiftAssignment?
+  swapRequests SwapRequest[]
+  handovers    Handover[]
+}
+
+model ShiftAssignment {
+  id               String @id @default(cuid())
+  shiftId          String @unique
+  primaryStaffId   String
+  secondaryStaffId String
+
+  shift          Shift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  primaryStaff   User  @relation("PrimaryStaff", fields: [primaryStaffId], references: [id])
+  secondaryStaff User  @relation("SecondaryStaff", fields: [secondaryStaffId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SwapRequest {
+  id            String    @id @default(cuid())
+  shiftId       String
+  requesterId   String
+  targetStaffId String
+  status        String    @default("PENDING")
+  reason        String?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  shift       Shift @relation(fields: [shiftId], references: [id])
+  requester   User  @relation("SwapRequester", fields: [requesterId], references: [id])
+  targetStaff User  @relation("SwapTarget", fields: [targetStaffId], references: [id])
+}
+
+model Handover {
+  id          String    @id @default(cuid())
+  shiftId     String
+  fromUserId  String
+  toUserId    String
+  notes       String
+  openItems   String?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  shift    Shift @relation(fields: [shiftId], references: [id])
+  fromUser User  @relation("HandoverFrom", fields: [fromUserId], references: [id])
+  toUser   User  @relation("HandoverTo", fields: [toUserId], references: [id])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  description String
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  type      String
+  isRead    Boolean  @default(false)
+  actionUrl String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SupportMetric {
+  id                 String   @id @default(cuid())
+  periodStart        DateTime
+  periodEnd          DateTime
+  responseRate       Float
+  avgResponseMins    Float
+  carerSatisfaction  Float
+  placementStability Float
+  createdAt          DateTime @default(now())
+}
