@@ -19,11 +19,12 @@ async function main() {
   // Create staff members
   const sarah = await prisma.user.create({
     data: {
+      id: "demo-user-1",
       email: "sarah.jenkins@swiis.com",
       passwordHash: password,
       firstName: "Sarah",
       lastName: "Jenkins",
-      role: "TEAM_LEAD",
+      role: "MANAGER",
       phone: "07700900001",
       isActive: true,
       escalationOrder: 1,
@@ -221,8 +222,8 @@ async function main() {
     }
   }
 
-  // Create sample swap request
-  if (shifts.length > 5) {
+  // Create sample swap requests
+  if (shifts.length > 10) {
     await prisma.swapRequest.create({
       data: {
         shiftId: shifts[5].id,
@@ -232,6 +233,64 @@ async function main() {
         reason: "Family commitment on this date",
         reviewedBy: sarah.id,
         reviewedAt: new Date(),
+      },
+    });
+
+    // Pending swap request on an upcoming shift
+    await prisma.swapRequest.create({
+      data: {
+        shiftId: shifts[shifts.length - 3].id,
+        requesterId: rebecca.id,
+        targetStaffId: emma.id,
+        status: "PENDING",
+        reason: "Medical appointment, can swap for any shift next week",
+      },
+    });
+
+    // Rejected swap
+    await prisma.swapRequest.create({
+      data: {
+        shiftId: shifts[8].id,
+        requesterId: liam.id,
+        targetStaffId: chloe.id,
+        status: "REJECTED",
+        reason: "Holiday clash",
+        reviewedBy: david.id,
+        reviewedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      },
+    });
+  }
+
+  // Create sample handovers
+  if (shifts.length > 10) {
+    await prisma.handover.create({
+      data: {
+        shiftId: shifts[3].id,
+        fromUserId: sarah.id,
+        toUserId: mark.id,
+        notes: "Quiet evening. One call from foster carer about bedtime routine - advised and resolved. Emergency phone fully charged.",
+        openItems: "Follow up with Carter family re: school transport Monday morning",
+        completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    await prisma.handover.create({
+      data: {
+        shiftId: shifts[6].id,
+        fromUserId: keith.id,
+        toUserId: rebecca.id,
+        notes: "Busy weekend. Two placement queries came in Saturday PM. Emergency placement for 14yo arranged with the Williams family. Social worker aware.\n\nAll documentation uploaded to case file.",
+        openItems: "Chase placement confirmation email from Williams family\nUpdate Sarah on Monday morning about the 14yo placement",
+      },
+    });
+
+    // Unacknowledged handover on a recent shift
+    await prisma.handover.create({
+      data: {
+        shiftId: shifts[shifts.length - 5].id,
+        fromUserId: emma.id,
+        toUserId: oliver.id,
+        notes: "All quiet tonight. No calls received. Phone battery at 85%.",
       },
     });
   }
