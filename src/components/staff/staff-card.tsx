@@ -44,7 +44,7 @@ export function StaffCard({
           <Link href={`/staff/${id}`} className="hover:underline">
             <p className="text-sm font-bold truncate">{fullName}</p>
           </Link>
-          <p className="text-[10px] text-slate-500 truncate">{email}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{email}</p>
         </div>
         <Badge variant={getRoleBadgeVariant(role)}>
           {ROLES[role as keyof typeof ROLES] ?? role}
@@ -70,7 +70,7 @@ export function StaffCard({
           </a>
           <Link
             href={`/staff/${id}`}
-            className="flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 py-1.5 rounded-lg active:scale-95 transition-transform"
+            className="flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 py-1.5 rounded-lg active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined text-sm">person</span>
             Profile

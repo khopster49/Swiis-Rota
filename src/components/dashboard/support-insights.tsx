@@ -44,7 +44,7 @@ function MetricCircle({
         </svg>
         <span className="absolute text-[10px] font-bold">{value}%</span>
       </div>
-      <span className="text-[9px] text-slate-500 leading-tight">{label}</span>
+      <span className="text-[9px] text-slate-500 dark:text-slate-400 leading-tight">{label}</span>
     </div>
   );
 }

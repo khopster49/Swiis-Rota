@@ -24,6 +24,16 @@
 body {
   font-family: var(--font-sans);
   min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+/* PWA standalone: extra top padding for status bar */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+  }
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -42,4 +52,23 @@ body {
 
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
+}
+
+/* Prevent text overflow on very small screens */
+@media (max-width: 320px) {
+  .calendar-grid {
+    font-size: 0.65rem;
+  }
+}
+
+/* Smooth transitions for dark mode */
+* {
+  transition-property: background-color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Override for elements that shouldn't transition */
+.animate-spin, .animate-pulse, [class*="transition-transform"] {
+  transition-property: transform;
 }

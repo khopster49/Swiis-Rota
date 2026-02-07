@@ -49,7 +49,7 @@ export function UpcomingShifts({ shifts }: { shifts: ShiftData[] }) {
               {shift.assignment && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[9px] text-slate-400 uppercase font-bold mb-1">
+                    <p className="text-[9px] text-slate-400 dark:text-slate-500 uppercase font-bold mb-1">
                       Primary
                     </p>
                     <p className="text-sm font-bold">
@@ -58,7 +58,7 @@ export function UpcomingShifts({ shifts }: { shifts: ShiftData[] }) {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[9px] text-slate-400 uppercase font-bold mb-1">
+                    <p className="text-[9px] text-slate-400 dark:text-slate-500 uppercase font-bold mb-1">
                       Secondary
                     </p>
                     <p className="text-sm font-bold">

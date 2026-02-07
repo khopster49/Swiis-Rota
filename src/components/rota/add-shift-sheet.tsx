@@ -138,7 +138,7 @@ export function AddShiftSheet({ isOpen, onClose, onShiftCreated }: AddShiftSheet
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Date */}
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Date *
               </label>
               <input
@@ -152,7 +152,7 @@ export function AddShiftSheet({ isOpen, onClose, onShiftCreated }: AddShiftSheet
 
             {/* Auto-detected type */}
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Shift Type
               </label>
               <div className="flex gap-2">
@@ -183,7 +183,7 @@ export function AddShiftSheet({ isOpen, onClose, onShiftCreated }: AddShiftSheet
 
             {/* Primary staff */}
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Primary On-Call *
               </label>
               <select
@@ -203,7 +203,7 @@ export function AddShiftSheet({ isOpen, onClose, onShiftCreated }: AddShiftSheet
 
             {/* Secondary staff */}
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Secondary On-Call *
               </label>
               <select
@@ -225,7 +225,7 @@ export function AddShiftSheet({ isOpen, onClose, onShiftCreated }: AddShiftSheet
 
             {/* Notes */}
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                 Notes (optional)
               </label>
               <textarea
@@ -239,7 +239,7 @@ export function AddShiftSheet({ isOpen, onClose, onShiftCreated }: AddShiftSheet
 
             {/* Error */}
             {error && (
-              <p className="text-xs text-swiis-red font-medium bg-swiis-red-light p-2 rounded">
+              <p className="text-xs text-swiis-red font-medium bg-swiis-red-light dark:bg-red-900/30 p-2 rounded">
                 {error}
               </p>
             )}

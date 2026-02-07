@@ -53,7 +53,7 @@ export function EscalationList({ chain }: { chain: EscalationPerson[] }) {
                   <Link href={`/staff/${person.id}`} className="hover:underline">
                     <p className="text-sm font-bold truncate">{fullName}</p>
                   </Link>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
                     {ROLES[person.role as keyof typeof ROLES] ?? person.role}
                   </p>
                 </div>
