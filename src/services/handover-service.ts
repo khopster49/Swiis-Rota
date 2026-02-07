@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { notifyHandoverCreated } from "@/services/notification-service";
 
 export async function getHandoversByShift(shiftId: string) {
   return prisma.handover.findMany({
@@ -63,6 +64,13 @@ export async function createHandover(data: {
       metadata: JSON.stringify({ handoverId: handover.id, shiftId: data.shiftId }),
     },
   });
+
+  // Notify the receiving staff member
+  await notifyHandoverCreated(
+    data.toUserId,
+    `${handover.fromUser.firstName} ${handover.fromUser.lastName}`,
+    data.shiftId
+  );
 
   return handover;
 }

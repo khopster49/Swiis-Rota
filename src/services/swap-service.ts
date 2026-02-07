@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { format } from "date-fns";
+import { notifySwapRequested, notifySwapReviewed } from "@/services/notification-service";
 
 export async function getSwapRequestsByShift(shiftId: string) {
   return prisma.swapRequest.findMany({
@@ -87,6 +89,14 @@ export async function createSwapRequest(data: {
     },
   });
 
+  // Notify target staff
+  await notifySwapRequested(
+    data.targetStaffId,
+    `${swap.requester.firstName} ${swap.requester.lastName}`,
+    format(new Date(swap.shift.startTime), "EEE d MMM"),
+    data.shiftId
+  );
+
   return swap;
 }
 
@@ -133,6 +143,7 @@ export async function reviewSwapRequest(
   }
 
   // Log activity
+  const reviewer = await prisma.user.findUnique({ where: { id: reviewerId } });
   await prisma.activityLog.create({
     data: {
       userId: reviewerId,
@@ -141,6 +152,14 @@ export async function reviewSwapRequest(
       metadata: JSON.stringify({ swapRequestId: swap.id }),
     },
   });
+
+  // Notify the requester about the review outcome
+  await notifySwapReviewed(
+    swap.requesterId,
+    status,
+    reviewer ? `${reviewer.firstName} ${reviewer.lastName}` : "A manager",
+    swap.shiftId
+  );
 
   return swap;
 }

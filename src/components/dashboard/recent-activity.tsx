@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
 interface ActivityItem {
@@ -29,9 +30,18 @@ export function RecentActivity({ activities }: { activities: ActivityItem[] }) {
 
   return (
     <div>
-      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
-        Recent Activity
-      </h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          Recent Activity
+        </h3>
+        <Link
+          href="/activity"
+          className="text-xs font-bold text-swiis-blue flex items-center gap-0.5 hover:underline"
+        >
+          View all
+          <span className="material-symbols-outlined text-sm">chevron_right</span>
+        </Link>
+      </div>
       <div className="space-y-3">
         {activities.map((activity) => {
           const { icon, bgColor, textColor } =

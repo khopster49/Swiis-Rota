@@ -8,6 +8,22 @@ export async function getRecentActivity(limit = 10) {
   });
 }
 
+export async function getPaginatedActivity({
+  limit = 20,
+  offset = 0,
+}: { limit?: number; offset?: number } = {}) {
+  const [activities, total] = await Promise.all([
+    prisma.activityLog.findMany({
+      include: { user: true },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      skip: offset,
+    }),
+    prisma.activityLog.count(),
+  ]);
+  return { activities, total };
+}
+
 export async function getMetrics() {
   return prisma.supportMetric.findFirst({
     orderBy: { periodEnd: "desc" },
