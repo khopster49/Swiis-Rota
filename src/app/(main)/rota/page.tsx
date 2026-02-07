@@ -1,25 +1,65 @@
+"use client";
+
+import { useState, useCallback } from "react";
 import { PageContainer } from "@/components/layout/page-container";
+import { ThreeMonthView } from "@/components/rota/three-month-view";
+import { ShiftFilter } from "@/components/rota/shift-filter";
+import { AddShiftSheet } from "@/components/rota/add-shift-sheet";
+import { useSWRConfig } from "swr";
+
+function getThreeMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+}
 
 export default function RotaPage() {
+  const [staffFilter, setStaffFilter] = useState<string | null>(null);
+  const [shiftTypeFilter, setShiftTypeFilter] = useState<string | null>(null);
+  const [isAddShiftOpen, setIsAddShiftOpen] = useState(false);
+  const { mutate } = useSWRConfig();
+
+  const handleShiftCreated = useCallback(() => {
+    // Revalidate all shift queries
+    mutate((key: string) => typeof key === "string" && key.startsWith("/api/shifts"));
+  }, [mutate]);
+
   return (
-    <PageContainer className="p-4 space-y-6">
+    <PageContainer className="p-4 space-y-4">
       <h1 className="text-2xl font-bold text-swiis-dark-blue dark:text-white">
         On-Call Calendar
       </h1>
+
+      {/* Action buttons */}
       <div className="grid grid-cols-2 gap-3">
-        <button className="bg-swiis-orange text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-95 transition-all">
+        <button
+          onClick={() => setIsAddShiftOpen(true)}
+          className="bg-swiis-orange text-white py-2.5 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-95 transition-all text-sm"
+        >
           <span className="material-symbols-outlined text-sm">add_circle</span>
           Add Shift
         </button>
-        <button className="bg-swiis-blue text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
-          <span className="material-symbols-outlined text-sm">filter_list</span>
-          Filter
-        </button>
+
+        <ShiftFilter
+          staffFilter={staffFilter}
+          shiftTypeFilter={shiftTypeFilter}
+          onStaffFilterChange={setStaffFilter}
+          onShiftTypeFilterChange={setShiftTypeFilter}
+        />
       </div>
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-8 border border-slate-100 dark:border-slate-700 text-center">
-        <span className="material-symbols-outlined text-4xl text-slate-300 mb-3">calendar_month</span>
-        <p className="text-slate-400 text-sm">3-month calendar view coming in Phase 4</p>
-      </div>
+
+      {/* Three month calendar view */}
+      <ThreeMonthView
+        initialStartMonth={getThreeMonthStart()}
+        staffFilter={staffFilter}
+        shiftTypeFilter={shiftTypeFilter}
+      />
+
+      {/* Add shift bottom sheet */}
+      <AddShiftSheet
+        isOpen={isAddShiftOpen}
+        onClose={() => setIsAddShiftOpen(false)}
+        onShiftCreated={handleShiftCreated}
+      />
     </PageContainer>
   );
 }
