@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -14,7 +16,8 @@ interface Props {
 export default async function StaffDetailPage({ params }: Props) {
   const { staffId } = await params;
 
-  const [person, upcoming, history] = await Promise.all([
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [person, upcoming, history]: [any, any[], any[]] = await Promise.all([
     getStaffById(staffId),
     getStaffUpcomingShifts(staffId, 5),
     getStaffShiftHistory(staffId, 10),

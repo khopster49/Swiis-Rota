@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getAllStaff, getEscalationChain } from "@/services/staff-service";
 import { PageContainer } from "@/components/layout/page-container";
 import { EscalationList } from "@/components/staff/escalation-list";

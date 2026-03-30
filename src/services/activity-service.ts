@@ -1,44 +1,67 @@
-import { prisma } from "@/lib/prisma";
+import { collections, docsToJSON, docToJSON, getSafeUser } from "@/lib/firestore";
 
 export async function getRecentActivity(limit = 10) {
-  return prisma.activityLog.findMany({
-    include: { user: true },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
+  const snap = await collections
+    .activityLogs()
+    .orderBy("createdAt", "desc")
+    .limit(limit)
+    .get();
+
+  const logs = docsToJSON<Record<string, unknown>>(snap);
+
+  return Promise.all(
+    logs.map(async (log) => {
+      const user = await getSafeUser(log.userId as string);
+      return { ...log, user };
+    })
+  );
 }
 
 export async function getPaginatedActivity({
   limit = 20,
   offset = 0,
 }: { limit?: number; offset?: number } = {}) {
-  const [activities, total] = await Promise.all([
-    prisma.activityLog.findMany({
-      include: { user: true },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-      skip: offset,
-    }),
-    prisma.activityLog.count(),
-  ]);
-  return { activities, total };
+  // Clamp limit to prevent abuse
+  const clampedLimit = Math.min(limit, 100);
+
+  const countSnap = await collections.activityLogs().count().get();
+  const total = countSnap.data().count;
+
+  let activities: (Record<string, unknown> & { id: string })[];
+
+  if (offset > 0) {
+    const allSnap = await collections
+      .activityLogs()
+      .orderBy("createdAt", "desc")
+      .limit(offset + clampedLimit)
+      .get();
+    activities = docsToJSON<Record<string, unknown>>(allSnap).slice(offset);
+  } else {
+    const snap = await collections
+      .activityLogs()
+      .orderBy("createdAt", "desc")
+      .limit(clampedLimit)
+      .get();
+    activities = docsToJSON<Record<string, unknown>>(snap);
+  }
+
+  const enriched = await Promise.all(
+    activities.map(async (log) => {
+      const user = await getSafeUser(log.userId as string);
+      return { ...log, user };
+    })
+  );
+
+  return { activities: enriched, total };
 }
 
 export async function getMetrics() {
-  return prisma.supportMetric.findFirst({
-    orderBy: { periodEnd: "desc" },
-  });
-}
+  const snap = await collections
+    .supportMetrics()
+    .orderBy("periodEnd", "desc")
+    .limit(1)
+    .get();
 
-export async function getNotifications(userId: string) {
-  return prisma.notification.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-  });
-}
-
-export async function getUnreadCount(userId: string) {
-  return prisma.notification.count({
-    where: { userId, isRead: false },
-  });
+  if (snap.empty) return null;
+  return docToJSON<Record<string, unknown>>(snap.docs[0]);
 }

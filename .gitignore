@@ -47,3 +47,10 @@ next-env.d.ts
 # database
 *.db
 *.db-journal
+
+# Firebase
+emulator-data/
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

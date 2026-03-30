@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:firestore": "npx tsx scripts/seed-firestore.ts",
+    "emulators": "firebase emulators:start --import=./emulator-data --export-on-exit",
+    "emulators:seed": "npm run emulators & sleep 5 && npm run seed:firestore"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
@@ -16,11 +19,14 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.4",
+    "firebase": "^12.11.0",
+    "firebase-admin": "^13.7.0",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "swr": "^2.4.0",
+    "zod": "^4.3.6",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { collections, docsToJSON, docToJSON, toTimestamp } from "@/lib/firestore";
 
 // ---- Queries ----
 
@@ -6,38 +6,64 @@ export async function getNotificationsByUser(
   userId: string,
   { limit = 20, offset = 0 }: { limit?: number; offset?: number } = {}
 ) {
-  const [notifications, total] = await Promise.all([
-    prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-      skip: offset,
-    }),
-    prisma.notification.count({ where: { userId } }),
-  ]);
+  // Get total count
+  const countSnap = await collections
+    .notifications()
+    .where("userId", "==", userId)
+    .count()
+    .get();
+  const total = countSnap.data().count;
+
+  // Get paginated results
+  let query = collections
+    .notifications()
+    .where("userId", "==", userId)
+    .orderBy("createdAt", "desc");
+
+  if (offset > 0) {
+    // For offset pagination, we fetch offset + limit and skip
+    const allSnap = await query.limit(offset + limit).get();
+    const notifications = docsToJSON<Record<string, unknown>>(allSnap).slice(offset);
+    return { notifications, total };
+  }
+
+  const snap = await query.limit(limit).get();
+  const notifications = docsToJSON<Record<string, unknown>>(snap);
   return { notifications, total };
 }
 
 export async function getUnreadNotificationCount(userId: string) {
-  return prisma.notification.count({
-    where: { userId, isRead: false },
-  });
+  const snap = await collections
+    .notifications()
+    .where("userId", "==", userId)
+    .where("isRead", "==", false)
+    .count()
+    .get();
+  return snap.data().count;
 }
 
 // ---- Mutations ----
 
 export async function markNotificationRead(notificationId: string) {
-  return prisma.notification.update({
-    where: { id: notificationId },
-    data: { isRead: true },
-  });
+  await collections.notifications().doc(notificationId).update({ isRead: true });
+  const doc = await collections.notifications().doc(notificationId).get();
+  return docToJSON<Record<string, unknown>>(doc);
 }
 
 export async function markAllNotificationsRead(userId: string) {
-  return prisma.notification.updateMany({
-    where: { userId, isRead: false },
-    data: { isRead: true },
+  const snap = await collections
+    .notifications()
+    .where("userId", "==", userId)
+    .where("isRead", "==", false)
+    .get();
+
+  const batch = (await import("@/lib/firestore")).db.batch();
+  snap.docs.forEach((doc) => {
+    batch.update(doc.ref, { isRead: true });
   });
+  await batch.commit();
+
+  return { count: snap.size };
 }
 
 // ---- Trigger helpers ----
@@ -49,12 +75,22 @@ export async function createNotification(data: {
   type: "SHIFT_REMINDER" | "SWAP_REQUEST" | "HANDOVER" | "ESCALATION" | "GENERAL";
   actionUrl?: string;
 }) {
-  return prisma.notification.create({ data });
+  const now = new Date().toISOString();
+  const ref = collections.notifications().doc();
+
+  await ref.set({
+    userId: data.userId,
+    title: data.title,
+    body: data.body,
+    type: data.type,
+    isRead: false,
+    actionUrl: data.actionUrl || null,
+    createdAt: toTimestamp(now),
+  });
+
+  return { id: ref.id, ...data, isRead: false, createdAt: now };
 }
 
-/**
- * Notify staff when a swap request is created targeting them.
- */
 export async function notifySwapRequested(
   targetUserId: string,
   requesterName: string,
@@ -70,9 +106,6 @@ export async function notifySwapRequested(
   });
 }
 
-/**
- * Notify requester when their swap is approved or rejected.
- */
 export async function notifySwapReviewed(
   requesterId: string,
   status: "APPROVED" | "REJECTED",
@@ -89,9 +122,6 @@ export async function notifySwapReviewed(
   });
 }
 
-/**
- * Notify the receiving staff member about a new handover.
- */
 export async function notifyHandoverCreated(
   toUserId: string,
   fromUserName: string,
@@ -106,9 +136,6 @@ export async function notifyHandoverCreated(
   });
 }
 
-/**
- * Notify staff about an upcoming shift (e.g. 24h before).
- */
 export async function notifyShiftReminder(
   userId: string,
   shiftDate: string,
